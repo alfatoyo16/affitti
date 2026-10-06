@@ -1,5 +1,3 @@
-// Incolla qui i valori che Firebase ti mostra in
-// Impostazioni progetto > Le tue app > Configurazione SDK.
 export const firebaseConfig = {
   apiKey: "AIzaSyA9YXNoX9XJ82Q5Hht2GVmNhdSrXpjdwic",
   authDomain: "affitti-aa58c.firebaseapp.com",
