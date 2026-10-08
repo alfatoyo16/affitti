@@ -2,7 +2,6 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="theme-color" content="#0d9488">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestione affitti</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -178,23 +177,13 @@ nav button.on .ni{background:var(--g)}
 .fy .tot td{font-weight:700;background:var(--bg)}
 @media(max-width:900px){.bil{grid-template-columns:1fr}}
 nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
-[hidden]{display:none!important}
-#login,#boot{position:fixed;inset:0;display:grid;place-items:center}
-#login{z-index:50;background:var(--hd)}
-#boot{z-index:40;background:var(--bg);color:var(--mu);text-align:center;padding:20px}
-.lbox{background:var(--card);padding:28px;border-radius:20px;width:min(360px,90vw);display:grid;gap:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3)}
-.lbox h1{margin:0;font-size:22px}.lbox p{margin:0;color:var(--mu)}.lbox .lg0{font-size:44px;line-height:1}
-#lerr{color:var(--rd);font-size:14px;min-height:1.2em}
 </style>
 </head>
 <body>
-<div id="login" hidden><form id="lf" class="lbox"><div class="lg0">🏡</div><h1>Gestione affitti</h1><p>Accedi per vedere i tuoi dati</p><input id="lem" type="email" placeholder="Email" autocomplete="username" required><input id="lpw" type="password" placeholder="Password" autocomplete="current-password" required><button class="btn">Accedi</button><div id="lerr" role="alert"></div></form></div>
-<div id="boot">Caricamento…</div>
 <header>
 <button class="menu-btn" id="mb" aria-label="Menu">☰</button>
 <span class="logo">🏡 Affitti</span>
 <button class="add" id="addTop"><i>+</i>Aggiungi</button>
-<button class="add" id="logout" hidden style="margin-left:auto"><i>⎋</i>Esci</button>
 </header>
 <div class="wrap">
 <nav id="nav" aria-label="Sezioni"></nav>
@@ -202,9 +191,10 @@ nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
 </div>
 <dialog id="dlg"><form id="frm" method="dialog"></form></dialog>
 <script>
-var S={p:[],t:[],l:[],x:[],pay:{}},view="scrivania";
+var KEY="affitti-locali-v1",S={p:[],t:[],l:[],pay:{}},view="scrivania";
+try{var r=localStorage.getItem(KEY);if(r){var j=JSON.parse(r);if(j&&j.p)S=j}}catch(e){}
 if(!S.x)S.x=[];
-function save(){if(window.cloudSave)window.cloudSave()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert("Non riesco a salvare i dati nel browser: spazio esaurito o archiviazione disattivata. Prova a eliminare qualche foto.")}}
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -216,7 +206,7 @@ function today(){return new Date().toISOString().slice(0,10)}
 function active(l){return !l.arch&&(!l.fine||l.fine>=today())}
 function ym(){return today().slice(0,7)}
 var NAV=[["h","🧭"],["scrivania","Scrivania","","🏡"],["proprieta","Proprietà","","🏢"],["inquilini","Inquilini","","🧑‍🤝‍🧑"],["locazioni","Locazioni","","🔑"],["finanze","Finanze","","💰"],["bilancio","Bilancio","sub","📊"],["h","🧰"],["canone","Aggiornamento del canone","sub","📈"],["conguaglio","Conguaglio spese","sub","🧮"]];
-function nav(){$("#nav").innerHTML=NAV.map(function(n){if(n[0]=="h")return"<h6>"+n[1]+"</h6>";return'<div class="'+(n[2]||"")+'"><button data-v="'+n[0]+'" class="'+((view=="propform"?"proprieta":view)==n[0]?"on":"")+'"><span class="ni">'+(n[3]||"")+"</span>"+n[1]+"</button></div>"}).join("")}
+function nav(){$("#nav").innerHTML=NAV.map(function(n){if(n[0]=="h")return"<h6>"+n[1]+"</h6>";return'<div class="'+(n[2]||"")+'"><button data-v="'+n[0]+'" class="'+((view=="propform"?"proprieta":view=="tenform"?"inquilini":view)==n[0]?"on":"")+'"><span class="ni">'+(n[3]||"")+"</span>"+n[1]+"</button></div>"}).join("")}
 $("#nav").onclick=function(e){var b=e.target.closest("button");if(b){go(b.dataset.v)}};
 $("#mb").onclick=function(){$("#nav").classList.toggle("open")};
 function go(v){view=v;$("#nav").classList.remove("open");render()}
@@ -228,6 +218,7 @@ l:{t:"affitto",f:[["pid","Proprietà","ref","p"],["tid","Inquilino","ref","t"],[
 };
 function openForm(k,id){
 if(k=="p"){openProp(id);return}
+if(k=="t"){openTen(id,PRE);return}
 var m=M[k],o=id?S[k].find(function(a){return a.id==id}):(k=="t"&&PRE?{tipo:PRE}:{});
 if(k=="l"&&(!S.p.length||!S.t.length)){alert("Prima crea almeno una proprietà e un inquilino.");go(!S.p.length?"proprieta":"inquilini");return}
 var h="<h2 style='margin:0 0 6px'>"+(id?"Modifica ":"Nuova ")+m.t+"</h2>";
@@ -408,6 +399,58 @@ $("#bya").onchange=function(){BX.anno=+this.value;renderBil()};
 $("#bpid").onchange=function(){BX.pid=this.value;renderBil()};
 $("#blid").onchange=function(){BX.lid=this.value;renderBil()};
 renderBil()}
+EM.tenform="🧑‍🤝‍🧑";
+function openTen(id,pre){var o=id?(S.t.find(function(a){return a.id==id})||{}):(pre?{tipo:pre}:{});
+PF={id:id||null,o:o,docs:(o.docs||[]).slice(),emerg:(o.emerg||[]).slice(),garanti:(o.garanti||[]).slice()};view="tenform";render()}
+V.tenform=function(){var o=PF.o,TT=["Informazioni generali","Informazioni aggiuntive","Garanti","Contatti di emergenza","Documenti"];
+function sec(t){return'<div class="sec">'+t+"</div>"}
+function fr(l,i,hint,req){return'<div class="fr"><label>'+l+(req?"<em>*</em>":"")+"</label><div>"+i+(hint?'<div class="hint">'+hint+"</div>":"")+"</div></div>"}
+function inp(n,t,x){return'<input name="'+n+'" type="'+(t||"text")+'" value="'+esc(o[n])+'" '+(x||"")+">"}
+function sel(n,opts,ph){return'<select name="'+n+'">'+(ph?'<option value="">'+ph+"</option>":"")+opts.map(function(x){return"<option"+(o[n]==x?" selected":"")+">"+x+"</option>"}).join("")+"</select>"}
+var ph='placeholder="312 345 6789"';
+var g=sec("Tipo di inquilino")+fr("Tipo",sel("tipo",["Privato singolo","Società"]),"",1)+fr("Nome / ragione sociale",inp("nome","text","required"),"",1)
++sec("Documento d'identità")+fr("Tipo",sel("idtipo",["Carta d'identità","Passaporto","Patente di guida","Altro"],"Scegli"))+fr("Numero",inp("idnum"))+fr("Scadenza",inp("idscad","date"))
++fr("File",'<input type="file" name="idf" accept=".doc,.docx,.pdf,.gif,.jpg,.jpeg,.png">'+(o.idfile?'<div class="hint">File attuale: '+esc(o.idfile)+"</div>":"")+'<div class="hint">Copia dell\'ID. Formati accettati: Word, PDF, Immagini (GIF, JPG, PNG). Dei file viene salvato solo il nome.</div>')
++sec("Contatti")+fr("Email",inp("email","email"),"Indirizzo e-mail dell'inquilino.")
++fr("E-mail secondaria",inp("email2","email"),"Indirizzo email secondario per l'invio manuale delle ricevute di affitto (ad esempio per inoltrare una copia al commercialista o a terzi).")
++fr("Cellulare",inp("cell","tel",ph))+fr("Telefono",inp("tel","tel",ph))
++sec("Indirizzo")+fr("Indirizzo",inp("indirizzo","text",'placeholder="Inserisci una posizione"'))+fr("Indirizzo 2",inp("indirizzo2"))+fr("Città",inp("citta"))+fr("CAP",inp("cap"))+fr("Regione",inp("regione"))+fr("Paese",sel("paese",PAESI,"Scegli il paese"));
+var a=sec("Informazioni società")+fr("Società",inp("societa"),"Se compili questa casella, il nome della società apparirà nelle fatture.")
++fr("P.IVA",inp("piva"),"Se compili questa casella, queste informazioni compariranno in automatico in alcuni documenti incluse le fatture.")
++fr("Registro Imprese",inp("registro"))+fr("Capitale",inp("capitale"))+fr("Settore di attività",inp("settore"))
++sec("Indirizzo di lavoro")+fr("Datore di lavoro",inp("datore"))+fr("Indirizzo",inp("lindirizzo","text",'placeholder="Inserisci una posizione"'))+fr("Città",inp("lcitta"))+fr("CAP",inp("lcap"))+fr("Regione",inp("lregione"))+fr("Paese",sel("lpaese",PAESI,"Scegli"))+fr("Telefono",inp("ltel","tel",ph))
++sec("Coordinate bancarie")+fr("Banca",inp("banca"))+fr("Indirizzo",inp("bindirizzo"))+fr("Città",inp("bcitta"))+fr("CAP",inp("bcap"))+fr("Paese",sel("bpaese",PAESI,"Scegli"))+fr("IBAN",inp("iban"))+fr("Swift/BIC",inp("swift"))
++sec("Informazioni aggiuntive")+fr("Nuovo indirizzo",inp("nuovoind"),"Nuovo indirizzo del locatario per la corrispondenza futura successiva alla sua partenza.")
++fr("Nota privata",'<textarea name="nota" rows="4">'+esc(o.nota)+"</textarea>","Solo tu puoi leggere questa nota.");
+var ga=sec("Garanti")+fr("Garanti",'<button type="button" class="btn ghost sm" id="agar">⊕ Aggiungi un garante</button><div class="hint">Se ne hai bisogno puoi aggiungere più garanti.</div><div id="glist"></div>');
+var em=sec("Contatti di emergenza")+fr("Contatti",'<button type="button" class="btn ghost sm" id="aem">⊕ Aggiungi un contatto</button><div class="hint">Se ne hai bisogno puoi aggiungere più contatti.</div><div id="elist"></div>');
+var dc=sec("Documenti")+fr("Documenti",'<button type="button" class="btn ghost sm" id="adoc2">⊕ Aggiungi un documento</button><div class="hint">È possibile aggiungere diversi documenti. Dei file viene salvato solo il nome.</div><div id="dlist2"></div>');
+var pn2=[g,a,ga,em,dc];
+return'<div class="top"><h1>'+(PF.id?"Modifica":"Nuovo")+' inquilino</h1></div><form id="tf" novalidate><div class="tabs">'+TT.map(function(t,i){return'<button type="button" class="tab'+(i?"":" on")+'">'+t+"</button>"}).join("")+'</div><div class="panel p0">'+pn2.map(function(c,i){return'<div class="tp"'+(i?' style="display:none"':"")+">"+c+"</div>"}).join("")+'</div><div class="pfoot"><button class="btn">Salva</button><button type="button" class="btn ghost" id="tcx">Annulla</button></div></form>'};
+function openPersona(key,title){var f=$("#frm");
+f.innerHTML='<h2 style="margin:0 0 6px">'+title+'</h2><label>Nome *</label><input name="nome" required><label>Rapporto / ruolo</label><input name="ruolo" placeholder="Es. genitore, datore di lavoro"><div class="grid2"><div><label>Email</label><input name="email" type="email"></div><div><label>Telefono</label><input name="tel" type="tel"></div></div><div class="row"><button type="button" class="btn ghost" id="pecx">Annulla</button><button class="btn">Salva</button></div>';
+$("#pecx").onclick=function(){$("#dlg").close()};
+f.onsubmit=function(e){e.preventDefault();var d=Object.fromEntries(new FormData(f));d.id=uid();PF[key].push(d);$("#dlg").close();renderPersone()};
+$("#dlg").showModal()}
+function renderPersone(){[["emerg","elist"],["garanti","glist"]].forEach(function(p){var el=$("#"+p[1]);if(!el)return;var L=PF[p[0]]||[];
+el.innerHTML=L.length?'<div class="scroll"><table class="tbl" style="margin-top:10px"><thead><tr><th>Nome</th><th>Rapporto</th><th>Email</th><th>Telefono</th><th></th></tr></thead><tbody>'+L.map(function(c){return"<tr><td><b>"+esc(c.nome)+"</b></td><td>"+(esc(c.ruolo)||"—")+"</td><td>"+(esc(c.email)||"—")+"</td><td>"+(esc(c.tel)||"—")+'</td><td><button type="button" class="btn del sm" data-pd="'+p[0]+":"+c.id+'">Elimina</button></td></tr>'}).join("")+"</tbody></table></div>":"";
+el.onclick=function(e){var b=e.target.closest("[data-pd]");if(!b||!confirm("Eliminare il contatto?"))return;var q=b.dataset.pd.split(":");PF[q[0]]=PF[q[0]].filter(function(x){return x.id!=q[1]});renderPersone()}})}
+function bindTenForm(){var f=$("#tf"),tabs=document.querySelectorAll(".tab"),pans=document.querySelectorAll(".tp");
+function show(i){tabs.forEach(function(t,j){t.classList.toggle("on",j==i)});pans.forEach(function(q,j){q.style.display=j==i?"":"none"})}
+tabs.forEach(function(t,i){t.onclick=function(){show(i)}});
+$("#tcx").onclick=function(){go("inquilini")};
+$("#agar").onclick=function(){openPersona("garanti","Aggiungi un garante")};
+$("#aem").onclick=function(){openPersona("emerg","Aggiungi un contatto di emergenza")};
+$("#adoc2").onclick=function(){openDoc("d")};
+renderPersone();renderDocs();
+f.onsubmit=function(e){e.preventDefault();
+if(!f.checkValidity()){show(0);f.reportValidity();return}
+var fd=new FormData(f),d=Object.fromEntries(fd),file=fd.get("idf");delete d.idf;
+if(file&&file.name){if(!/\.(docx?|pdf|gif|jpe?g|png)$/i.test(file.name)){show(0);alert("Formato del file non accettato. Usa Word, PDF o immagini GIF, JPG, PNG.");return}
+if(file.size>15*1048576){show(0);alert("Il file supera i 15 MB.");return}d.idfile=file.name}
+d.docs=PF.docs;d.emerg=PF.emerg;d.garanti=PF.garanti;
+if(PF.id)Object.assign(PF.o,d);else{d.id=uid();S.t.push(d)}
+save();go("inquilini")}}
 var TS={arch:false,tipo:"",q:"",n:100,s:"nome",d:1},PRE=null;
 function tenShell(){
 return'<div class="th"><h1>Inquilini</h1><div class="seg tseg" id="tseg"><button type="button" data-ar="0" class="on">✓ Attivi</button><button type="button" data-ar="1">Archivio</button></div><div class="dd"><button class="btn" id="tnew">Nuovo inquilino ▾</button><div class="ddm" id="tmenu" hidden><button type="button" data-tt="Privato singolo">Privato singolo</button><button type="button" data-tt="Società">Società</button></div></div></div>'
@@ -417,7 +460,7 @@ function renderTen(){
 var el=$("#tbody");if(!el)return;
 var q=TS.q.toLowerCase(),rows=S.t.filter(function(t){return !!t.arch==TS.arch&&(!TS.tipo||(t.tipo||"Privato singolo")==TS.tipo)&&(!q||[t.nome,t.email,t.tel].join(" ").toLowerCase().indexOf(q)>-1)}).map(function(t){
 var ls=S.l.filter(function(l){return l.tid==t.id&&active(l)}),due=ls.reduce(function(s,l){return isPaid(l)?s:s+ +l.canone},0);
-return{t:t,nome:t.nome||"",tipo:t.tipo||"Privato singolo",prop:ls.map(function(l){return pn(l.pid)}).join(", "),tel:t.tel||"",email:t.email||"",saldo:-due,stato:ls.length?"In locazione":"Senza affitto"}});
+return{t:t,nome:t.nome||"",tipo:t.tipo||"Privato singolo",prop:ls.map(function(l){return pn(l.pid)}).join(", "),tel:t.tel||t.cell||"",email:t.email||"",saldo:-due,stato:ls.length?"In locazione":"Senza affitto"}});
 rows.sort(function(a,b){var x=a[TS.s],y=b[TS.s];return(typeof x=="number"?x-y:String(x).localeCompare(y,"it"))*TS.d});
 var tot=rows.length;rows=rows.slice(0,TS.n);
 var cols=[["nome","Inquilino"],["tipo","Tipo"],["prop","Proprietà"],["tel","Telefono"],["email","Email"],["saldo","Saldo"],["stato","Stato"]];
@@ -452,7 +495,7 @@ if(!/\.(gif|jpe?g|png)$/i.test(f.name)){alert("«"+f.name+"»: formato non accet
 if(f.size>15*1048576){alert("«"+f.name+"» supera i 15 MB.");return}
 var r=new FileReader(),im=new Image();
 r.onload=function(){im.src=r.result};
-im.onload=function(){var s=Math.min(1,640/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);PF.fotos.push({id:uid(),name:f.name,src:c.toDataURL("image/jpeg",.6)});renderFoto()};
+im.onload=function(){var s=Math.min(1,800/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);PF.fotos.push({id:uid(),name:f.name,src:c.toDataURL("image/jpeg",.72)});renderFoto()};
 im.onerror=function(){alert("Impossibile leggere «"+f.name+"».")};
 r.readAsDataURL(f)})}
 function renderFoto(){var el=$("#flist");if(!el)return;
@@ -474,7 +517,7 @@ el.innerHTML='<div class="scroll"><table class="tbl" style="margin-top:10px"><th
 el.onclick=function(e){var b=e.target.closest("[data-del]");if(!b||!confirm("Eliminare il documento?"))return;PF.docs=PF.docs.filter(function(x){return x.id!=b.dataset.del});renderDocs()}}
 function openDoc(sez){
 var tipi=["Contratto di locazione","Certificato energetico (APE)","Impianto elettrico","Impianto gas","Agibilità","Visura catastale","Assicurazione","Altro"],mode="n",ex=[],f=$("#frm");
-S.p.forEach(function(p){(p.docs||[]).forEach(function(d){if(ex.indexOf(d.file)<0)ex.push(d.file)})});
+S.p.concat(S.t).forEach(function(p){(p.docs||[]).forEach(function(d){if(ex.indexOf(d.file)<0)ex.push(d.file)})});
 PF.docs.forEach(function(d){if(ex.indexOf(d.file)<0)ex.push(d.file)});
 f.innerHTML='<h2 style="margin:0 0 6px">Aggiungi un documento</h2><label>Tipo *</label><select name="tipo" required><option value="">Scegli</option>'+tipi.map(function(x){return"<option>"+x+"</option>"}).join("")+'</select><label>Documento</label><div class="seg"><button type="button" data-m="n" class="on">Nuovo</button><button type="button" data-m="e">Esistente</button></div><div id="dn" style="margin-top:8px"><input type="file" name="f" accept=".doc,.docx,.pdf,.gif,.jpg,.jpeg,.png"><div class="hint">Formati accettati: Word, PDF, Immagini (GIF, JPG, PNG). Dimensione massima: 15 Mega</div></div><div id="de" style="display:none;margin-top:8px"><select name="ex"><option value="">Scegli</option>'+ex.map(function(x){return'<option value="'+esc(x)+'">'+esc(x)+"</option>"}).join("")+"</select>"+(ex.length?"":'<div class="hint">Nessun documento caricato finora.</div>')+'</div><label>Descrizione *</label><textarea name="desc" rows="2" required placeholder="Descrizione, tipo, azienda, durata, ..."></textarea><div class="grid2"><div><label>Effettuato in data</label><input type="date" name="data"></div><div><label>Data scadenza</label><input type="date" name="scad"></div></div><div class="row"><button type="button" class="btn ghost" id="dcx">Annulla</button><button class="btn">Salva</button></div>';
 f.querySelector(".seg").onclick=function(e){var b=e.target.closest("button");if(!b)return;mode=b.dataset.m;f.querySelectorAll(".seg button").forEach(function(x){x.classList.toggle("on",x==b)});$("#dn").style.display=mode=="n"?"":"none";$("#de").style.display=mode=="e"?"":"none"};
@@ -550,12 +593,12 @@ var fd=new FormData(f),d=Object.fromEntries(fd);d.dotazioni=fd.getAll("dot");del
 ["ammob","fumatori","animali"].forEach(function(k){d[k]=fd.has(k)?1:0});
 if(!ci.dataset.t)delete d.colore;
 d.docs=PF.docs;d.fotos=PF.fotos;d.contatti=PF.contatti;
-if(JSON.stringify(d).length>900000){alert("La scheda è troppo grande (troppe foto): elimina qualche foto.");return}
 if(PF.id)Object.assign(PF.o,d);else{d.id=uid();S.p.push(d)}
 save();go("proprieta")}}
 function bind(){
 if(view=="propform")bindProp();
 if(view=="inquilini")bindTen();
+if(view=="tenform")bindTenForm();
 if(view=="locazioni")bindLoc();
 if(view=="finanze")bindFin();
 if(view=="bilancio")bindBil();
@@ -563,55 +606,7 @@ if(view=="canone"){var f=function(){var c=parseFloat($("#c1").value),v=parseFloa
 if(view=="conguaglio"){var g=function(){var a=parseFloat($("#g1").value),s=parseFloat($("#g2").value);if(isNaN(a)||isNaN(s)){$("#gr").textContent="Inserisci gli importi per vedere il risultato.";return}var d=s-a;$("#gr").innerHTML=d>0?"L'inquilino deve versare <b>"+eur(d)+"</b>":d<0?"Da restituire all'inquilino: <b>"+eur(-d)+"</b>":"Nessun conguaglio: acconti e spese coincidono."};["g1","g2"].forEach(function(i){$("#"+i).oninput=g})}}
 var EM={scrivania:"🏡",proprieta:"🏢",inquilini:"🧑‍🤝‍🧑",canone:"📈",conguaglio:"🧮",propform:"🏢"};
 function render(){nav();$("#main").innerHTML=V[view]();bind();var h1=$("#main h1");if(h1&&EM[view]&&h1.textContent.indexOf(EM[view])<0)h1.textContent=EM[view]+" "+h1.textContent;$("#main").scrollTop=0}
-window.appStart=function(){render()};
-</script>
-<script type="module">
-import {firebaseConfig} from "./firebase-config.js";
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,onSnapshot,doc,writeBatch} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-const q=s=>document.querySelector(s);
-if(String(firebaseConfig.apiKey).startsWith("INCOLLA")){q("#boot").textContent="Prima completa il file firebase-config.js (vedi le istruzioni).";throw new Error("config mancante")}
-const app=initializeApp(firebaseConfig),auth=getAuth(app),
-db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
-const COLL=["p","t","l","x"];
-let uid=null,unsubs=[],LAST={},loaded=0,started=false;
-const snapOf=c=>{const m={};(S[c]||[]).forEach(o=>m[o.id]=JSON.stringify(o));return m};
-window.cloudSave=function(){
-  if(!uid)return;
-  const b=writeBatch(db);let n=0;
-  COLL.forEach(c=>{const cur=snapOf(c),old=LAST[c]||{};
-    for(const id in cur){if(cur[id]!==old[id]){b.set(doc(db,"users",uid,c,id),JSON.parse(cur[id]));n++}}
-    for(const id in old){if(!(id in cur)){b.delete(doc(db,"users",uid,c,id));n++}}
-    LAST[c]=cur});
-  if(n)b.commit().catch(e=>{LAST={};alert("Errore di salvataggio: "+e.message)});
-};
-function listen(){
-  COLL.forEach(c=>{
-    unsubs.push(onSnapshot(collection(db,"users",uid,c),snap=>{
-      if(started&&snap.metadata.hasPendingWrites)return;
-      const arr=S[c],seen=new Set();
-      snap.forEach(d=>{const data={...d.data(),id:d.id};seen.add(d.id);
-        const ex=arr.find(o=>o.id===d.id);
-        if(ex){for(const k in ex)delete ex[k];Object.assign(ex,data)}else arr.push(data)});
-      for(let i=arr.length-1;i>=0;i--)if(!seen.has(arr[i].id))arr.splice(i,1);
-      LAST[c]=snapOf(c);
-      if(!started){if(++loaded===COLL.length){started=true;q("#boot").hidden=true;window.appStart()}}
-      else if(view!=="propform"&&!q("#dlg").open)render();
-    },err=>alert("Errore di lettura dati: "+err.message)));
-  });
-}
-onAuthStateChanged(auth,u=>{
-  unsubs.forEach(f=>f());unsubs=[];loaded=0;started=false;LAST={};
-  COLL.forEach(c=>{S[c].length=0});
-  if(u){uid=u.uid;q("#login").hidden=true;q("#logout").hidden=false;q("#boot").hidden=false;q("#boot").textContent="Caricamento dati…";listen()}
-  else{uid=null;q("#login").hidden=false;q("#logout").hidden=true;q("#boot").hidden=true}
-});
-q("#lf").onsubmit=async e=>{e.preventDefault();q("#lerr").textContent="";
-  try{await signInWithEmailAndPassword(auth,q("#lem").value,q("#lpw").value)}
-  catch(err){q("#lerr").textContent="Accesso non riuscito: controlla email e password."}};
-q("#logout").onclick=()=>signOut(auth);
+render();
 </script>
 </body>
 </html>
- 
