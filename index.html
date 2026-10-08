@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#0d9488">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gestione affitti</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -177,13 +178,23 @@ nav button.on .ni{background:var(--g)}
 .fy .tot td{font-weight:700;background:var(--bg)}
 @media(max-width:900px){.bil{grid-template-columns:1fr}}
 nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
+[hidden]{display:none!important}
+#login,#boot{position:fixed;inset:0;display:grid;place-items:center}
+#login{z-index:50;background:var(--hd)}
+#boot{z-index:40;background:var(--bg);color:var(--mu);text-align:center;padding:20px}
+.lbox{background:var(--card);padding:28px;border-radius:20px;width:min(360px,90vw);display:grid;gap:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.lbox h1{margin:0;font-size:22px}.lbox p{margin:0;color:var(--mu)}.lbox .lg0{font-size:44px;line-height:1}
+#lerr{color:var(--rd);font-size:14px;min-height:1.2em}
 </style>
 </head>
 <body>
+<div id="login" hidden><form id="lf" class="lbox"><div class="lg0">🏡</div><h1>Gestione affitti</h1><p>Accedi per vedere i tuoi dati</p><input id="lem" type="email" placeholder="Email" autocomplete="username" required><input id="lpw" type="password" placeholder="Password" autocomplete="current-password" required><button class="btn">Accedi</button><div id="lerr" role="alert"></div></form></div>
+<div id="boot">Caricamento…</div>
 <header>
 <button class="menu-btn" id="mb" aria-label="Menu">☰</button>
 <span class="logo">🏡 Affitti</span>
 <button class="add" id="addTop"><i>+</i>Aggiungi</button>
+<button class="add" id="logout" hidden style="margin-left:auto"><i>⎋</i>Esci</button>
 </header>
 <div class="wrap">
 <nav id="nav" aria-label="Sezioni"></nav>
@@ -191,10 +202,9 @@ nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
 </div>
 <dialog id="dlg"><form id="frm" method="dialog"></form></dialog>
 <script>
-var KEY="affitti-locali-v1",S={p:[],t:[],l:[],pay:{}},view="scrivania";
-try{var r=localStorage.getItem(KEY);if(r){var j=JSON.parse(r);if(j&&j.p)S=j}}catch(e){}
+var S={p:[],t:[],l:[],x:[],pay:{}},view="scrivania";
 if(!S.x)S.x=[];
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert("Non riesco a salvare i dati nel browser: spazio esaurito o archiviazione disattivata. Prova a eliminare qualche foto.")}}
+function save(){if(window.cloudSave)window.cloudSave()}
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -495,7 +505,7 @@ if(!/\.(gif|jpe?g|png)$/i.test(f.name)){alert("«"+f.name+"»: formato non accet
 if(f.size>15*1048576){alert("«"+f.name+"» supera i 15 MB.");return}
 var r=new FileReader(),im=new Image();
 r.onload=function(){im.src=r.result};
-im.onload=function(){var s=Math.min(1,800/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);PF.fotos.push({id:uid(),name:f.name,src:c.toDataURL("image/jpeg",.72)});renderFoto()};
+im.onload=function(){var s=Math.min(1,640/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);PF.fotos.push({id:uid(),name:f.name,src:c.toDataURL("image/jpeg",.6)});renderFoto()};
 im.onerror=function(){alert("Impossibile leggere «"+f.name+"».")};
 r.readAsDataURL(f)})}
 function renderFoto(){var el=$("#flist");if(!el)return;
@@ -593,6 +603,7 @@ var fd=new FormData(f),d=Object.fromEntries(fd);d.dotazioni=fd.getAll("dot");del
 ["ammob","fumatori","animali"].forEach(function(k){d[k]=fd.has(k)?1:0});
 if(!ci.dataset.t)delete d.colore;
 d.docs=PF.docs;d.fotos=PF.fotos;d.contatti=PF.contatti;
+if(JSON.stringify(d).length>900000){alert("La scheda è troppo grande (troppe foto): elimina qualche foto.");return}
 if(PF.id)Object.assign(PF.o,d);else{d.id=uid();S.p.push(d)}
 save();go("proprieta")}}
 function bind(){
@@ -606,7 +617,54 @@ if(view=="canone"){var f=function(){var c=parseFloat($("#c1").value),v=parseFloa
 if(view=="conguaglio"){var g=function(){var a=parseFloat($("#g1").value),s=parseFloat($("#g2").value);if(isNaN(a)||isNaN(s)){$("#gr").textContent="Inserisci gli importi per vedere il risultato.";return}var d=s-a;$("#gr").innerHTML=d>0?"L'inquilino deve versare <b>"+eur(d)+"</b>":d<0?"Da restituire all'inquilino: <b>"+eur(-d)+"</b>":"Nessun conguaglio: acconti e spese coincidono."};["g1","g2"].forEach(function(i){$("#"+i).oninput=g})}}
 var EM={scrivania:"🏡",proprieta:"🏢",inquilini:"🧑‍🤝‍🧑",canone:"📈",conguaglio:"🧮",propform:"🏢"};
 function render(){nav();$("#main").innerHTML=V[view]();bind();var h1=$("#main h1");if(h1&&EM[view]&&h1.textContent.indexOf(EM[view])<0)h1.textContent=EM[view]+" "+h1.textContent;$("#main").scrollTop=0}
-render();
+window.appStart=function(){render()};
+</script>
+<script type="module">
+import {firebaseConfig} from "./firebase-config.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,onSnapshot,doc,writeBatch} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+const q=s=>document.querySelector(s);
+if(String(firebaseConfig.apiKey).startsWith("INCOLLA")){q("#boot").textContent="Prima completa il file firebase-config.js (vedi le istruzioni).";throw new Error("config mancante")}
+const app=initializeApp(firebaseConfig),auth=getAuth(app),
+db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+const COLL=["p","t","l","x"];
+let uid=null,unsubs=[],LAST={},loaded=0,started=false;
+const snapOf=c=>{const m={};(S[c]||[]).forEach(o=>m[o.id]=JSON.stringify(o));return m};
+window.cloudSave=function(){
+  if(!uid)return;
+  const b=writeBatch(db);let n=0;
+  COLL.forEach(c=>{const cur=snapOf(c),old=LAST[c]||{};
+    for(const id in cur){if(cur[id]!==old[id]){b.set(doc(db,"users",uid,c,id),JSON.parse(cur[id]));n++}}
+    for(const id in old){if(!(id in cur)){b.delete(doc(db,"users",uid,c,id));n++}}
+    LAST[c]=cur});
+  if(n)b.commit().catch(e=>{LAST={};alert("Errore di salvataggio: "+e.message)});
+};
+function listen(){
+  COLL.forEach(c=>{
+    unsubs.push(onSnapshot(collection(db,"users",uid,c),snap=>{
+      if(started&&snap.metadata.hasPendingWrites)return;
+      const arr=S[c],seen=new Set();
+      snap.forEach(d=>{const data={...d.data(),id:d.id};seen.add(d.id);
+        const ex=arr.find(o=>o.id===d.id);
+        if(ex){for(const k in ex)delete ex[k];Object.assign(ex,data)}else arr.push(data)});
+      for(let i=arr.length-1;i>=0;i--)if(!seen.has(arr[i].id))arr.splice(i,1);
+      LAST[c]=snapOf(c);
+      if(!started){if(++loaded===COLL.length){started=true;q("#boot").hidden=true;window.appStart()}}
+      else if(view!=="propform"&&!q("#dlg").open)render();
+    },err=>alert("Errore di lettura dati: "+err.message)));
+  });
+}
+onAuthStateChanged(auth,u=>{
+  unsubs.forEach(f=>f());unsubs=[];loaded=0;started=false;LAST={};
+  COLL.forEach(c=>{S[c].length=0});
+  if(u){uid=u.uid;q("#login").hidden=true;q("#logout").hidden=false;q("#boot").hidden=false;q("#boot").textContent="Caricamento dati…";listen()}
+  else{uid=null;q("#login").hidden=false;q("#logout").hidden=true;q("#boot").hidden=true}
+});
+q("#lf").onsubmit=async e=>{e.preventDefault();q("#lerr").textContent="";
+  try{await signInWithEmailAndPassword(auth,q("#lem").value,q("#lpw").value)}
+  catch(err){q("#lerr").textContent="Accesso non riuscito: controlla email e password."}};
+q("#logout").onclick=()=>signOut(auth);
 </script>
 </body>
 </html>
