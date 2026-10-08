@@ -185,6 +185,10 @@ nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
 .lbox{background:var(--card);padding:28px;border-radius:20px;width:min(360px,90vw);display:grid;gap:12px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 .lbox h1{margin:0;font-size:22px}.lbox p{margin:0;color:var(--mu)}.lbox .lg0{font-size:44px;line-height:1}
 #lerr{color:var(--rd);font-size:14px;min-height:1.2em}
+.ng{padding:8px 10px 2px;font-weight:700;color:var(--mu);margin-top:6px}
+.info{background:rgba(14,165,233,.1);border-left:4px solid #0ea5e9;border-radius:12px;padding:14px 18px;margin-bottom:14px;line-height:1.5}
+.lnk{background:none;border:0;color:var(--bl);font:inherit;cursor:pointer;padding:2px 0;text-align:left}
+.lnk:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -203,7 +207,7 @@ nav h6{font-size:20px;letter-spacing:0;margin:14px 10px 4px;line-height:1}
 <dialog id="dlg"><form id="frm" method="dialog"></form></dialog>
 <script>
 var S={p:[],t:[],l:[],x:[],pay:{}},view="scrivania";
-if(!S.x)S.x=[];
+if(!S.x)S.x=[];if(!S.d)S.d=[];
 function save(){if(window.cloudSave)window.cloudSave()}
 var $=function(s){return document.querySelector(s)};
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
@@ -215,8 +219,8 @@ function tn(id){var x=S.t.find(function(a){return a.id==id});return x?x.nome:"(e
 function today(){return new Date().toISOString().slice(0,10)}
 function active(l){return !l.arch&&(!l.fine||l.fine>=today())}
 function ym(){return today().slice(0,7)}
-var NAV=[["h","🧭"],["scrivania","Scrivania","","🏡"],["proprieta","Proprietà","","🏢"],["inquilini","Inquilini","","🧑‍🤝‍🧑"],["locazioni","Locazioni","","🔑"],["finanze","Finanze","","💰"],["bilancio","Bilancio","sub","📊"],["h","🧰"],["canone","Aggiornamento del canone","sub","📈"],["conguaglio","Conguaglio spese","sub","🧮"]];
-function nav(){$("#nav").innerHTML=NAV.map(function(n){if(n[0]=="h")return"<h6>"+n[1]+"</h6>";return'<div class="'+(n[2]||"")+'"><button data-v="'+n[0]+'" class="'+((view=="propform"?"proprieta":view=="tenform"?"inquilini":view)==n[0]?"on":"")+'"><span class="ni">'+(n[3]||"")+"</span>"+n[1]+"</button></div>"}).join("")}
+var NAV=[["h","🧭"],["scrivania","Scrivania","","🏡"],["proprieta","Proprietà","","🏢"],["inquilini","Inquilini","","🧑‍🤝‍🧑"],["locazioni","Locazioni","","🔑"],["finanze","Finanze","","💰"],["bilancio","Bilancio","sub","📊"],["g","Documenti","","📁"],["documenti","Documenti","sub","🗂️"],["modelli","Modelli documenti","sub","📝"],["h","🧰"],["canone","Aggiornamento del canone","sub","📈"],["conguaglio","Conguaglio spese","sub","🧮"]];
+function nav(){$("#nav").innerHTML=NAV.map(function(n){if(n[0]=="h")return"<h6>"+n[1]+"</h6>";if(n[0]=="g")return'<div class="ng"><span class="ni">'+n[3]+"</span>"+n[1]+"</div>";return'<div class="'+(n[2]||"")+'"><button data-v="'+n[0]+'" class="'+((view=="propform"?"proprieta":view=="tenform"?"inquilini":view=="docform"?"documenti":view)==n[0]?"on":"")+'"><span class="ni">'+(n[3]||"")+"</span>"+n[1]+"</button></div>"}).join("")}
 $("#nav").onclick=function(e){var b=e.target.closest("button");if(b){go(b.dataset.v)}};
 $("#mb").onclick=function(){$("#nav").classList.toggle("open")};
 function go(v){view=v;$("#nav").classList.remove("open");render()}
@@ -224,7 +228,7 @@ function go(v){view=v;$("#nav").classList.remove("open");render()}
 var M={
 p:{t:"proprietà",f:[["nome","Nome del locale","text"],["indirizzo","Indirizzo","text"],["mq","Superficie (m²)","number"],["tipo","Tipo","select",["Negozio","Ufficio","Magazzino","Box / garage","Altro"]]]},
 t:{t:"inquilino",f:[["tipo","Tipo","select",["Privato singolo","Società"]],["nome","Nome o ragione sociale","text"],["email","Email","email"],["tel","Telefono","tel"]]},
-l:{t:"affitto",f:[["pid","Proprietà","ref","p"],["tid","Inquilino","ref","t"],["tipo","Tipo di locazione","select",["Commerciale 6+6","Abitativo 4+4","Abitativo 3+2 concordato","Transitorio","Uso foresteria","Breve periodo"]],["canone","Canone mensile (€)","number"],["speseacc","Spese accessorie mensili (€)","number"],["deposito","Deposito cauzionale (€)","number"],["inizio","Inizio contratto","date"],["fine","Fine contratto (facoltativa)","date"]]}
+l:{t:"affitto",f:[["pid","Proprietà","ref","p"],["tid","Inquilino","ref","t"],["tipo","Tipo di locazione","select",["Commerciale 6+6","Abitativo 4+4","Abitativo 3+2 concordato","Transitorio","Uso foresteria","Breve periodo","Affitto arredato","Affitto non arredato","Vacanze e affitti brevi"]],["canone","Canone mensile (€)","number"],["speseacc","Spese accessorie mensili (€)","number"],["deposito","Deposito cauzionale (€)","number"],["inizio","Inizio contratto","date"],["fine","Fine contratto (facoltativa)","date"]]}
 };
 function openForm(k,id){
 if(k=="p"){openProp(id);return}
@@ -285,8 +289,8 @@ conguaglio:function(){return'<h1>Conguaglio spese</h1><div class="panel" style="
 var PF={o:{}},TABS=["Informazioni generali","Informazioni aggiuntive","Contratti e Diagnostica","Foto","Contatti","Documenti"],
 TIPI=["Appartamento","Casa indipendente","Locale commerciale","Negozio","Ufficio","Magazzino","Box / garage","Terreno","Altro"],
 PAESI=["Italia","San Marino","Città del Vaticano","Svizzera","Francia","Germania","Spagna","Altro"],
-STATI=["Automatico","Affittato","Sfitto","In ristrutturazione"],
-TLOC=["Abitativo 4+4","Abitativo 3+2 concordato","Transitorio","Commerciale 6+6","Uso foresteria","Breve periodo"],
+STATI=["Automatico","Affittato","Sfitto","In ristrutturazione","Preavviso/uscita","Non disponibile"],
+TLOC=["Abitativo 4+4","Abitativo 3+2 concordato","Transitorio","Commerciale 6+6","Uso foresteria","Breve periodo","Affitto arredato","Affitto non arredato","Vacanze e affitti brevi"],
 DUR=["1 mese","3 mesi","6 mesi","12 mesi","24 mesi","36 mesi","72 mesi"],
 FREQ=["Mensile","Bimestrale","Trimestrale","Semestrale","Annuale"],
 CLASSI=["A4","A3","A2","A1","B","C","D","E","F","G"];
@@ -305,7 +309,7 @@ function isPaid(l){return S.x.some(function(x){return x.lid==l.id&&x.cat=="Canon
 function lst(l){var t=today();if(l.arch||(l.fine&&l.fine<t))return"Concluso";if(l.inizio>t)return"Da iniziare";if(l.fine&&l.fine<=new Date(Date.now()+90*864e5).toISOString().slice(0,10))return"In scadenza";return"In corso"}
 function dur(l){if(!l.fine)return"Indeterminata";var a=new Date(l.inizio),b=new Date(l.fine),m=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth()+1;return m+(m==1?" mese":" mesi")}
 function ltag(s){return'<span class="tag'+(s=="Concluso"?" r":s=="In corso"?"":" w")+'">'+s+"</span>"}
-function act(a,b){var id=b.dataset.id;
+function act(a,b){var id=b.dataset.id;if(act2(a,b,id))return true;
 if(a=="newx"){openTx(null,b.dataset.t);return true}
 if(a=="edx"){openTx(id);return true}
 if(a=="delx"){if(confirm("Eliminare la transazione?")){S.x=S.x.filter(function(x){return x.id!=id});save();render()}return true}
@@ -315,14 +319,14 @@ if(a=="incl"){var l2=S.l.find(function(x){return x.id==id}),m0=ym(),ex=S.x.find(
 if(ex&&ex.stato=="Saldato")S.x=S.x.filter(function(x){return x!=ex});else if(ex)ex.stato="Saldato";else S.x.push({id:uid(),tipo:"entrata",data:today(),pid:l2.pid,lid:l2.id,daa:tn(l2.tid),importo:+l2.canone||0,cat:"Canone",desc:"Canone "+new Date().toLocaleDateString("it-IT",{month:"long",year:"numeric"}),stato:"Saldato"});
 save();render();return true}
 return false}
-function openTx(id,tipo){
-var o=id?S.x.find(function(x){return x.id==id}):{tipo:tipo||"entrata",data:today(),stato:"Saldato"};if(!o)return;
+function openTx(id,tipo,pre){
+var o=id?S.x.find(function(x){return x.id==id}):{tipo:tipo||"entrata",data:today(),stato:"Saldato"};if(!o)return;if(pre)Object.assign(o,pre);
 var en=o.tipo=="entrata",f=$("#frm");
 f.innerHTML='<h2 style="margin:0 0 6px">'+(id?"Modifica transazione":en?"📥 Nuova entrata":"📤 Nuova spesa")+'</h2><label>Data *</label><input type="date" name="data" required value="'+esc(o.data)+'"><label>Locazione</label><select name="lid">'+lOpts(o.lid,"— Nessuna —")+'</select><label>Proprietà</label><select name="pid">'+pOpts(o.pid,"— Nessuna —")+'</select><label>'+(en?"Da (chi paga)":"A (chi incassa)")+'</label><input name="daa" value="'+esc(o.daa)+'"><div class="grid2"><div><label>Importo (€) *</label><input type="number" name="importo" step="any" min="0.01" required value="'+esc(o.importo)+'"></div><div><label>Categoria</label><select name="cat">'+(en?CATE:CATS).map(function(c){return so(c,o.cat)}).join("")+'</select></div></div><label>Descrizione *</label><input name="desc" required value="'+esc(o.desc)+'"><label>Stato</label><select name="stato">'+so("Saldato",o.stato)+so("In sospeso",o.stato)+'</select><div class="row"><button type="button" class="btn ghost" id="xcx">Annulla</button><button class="btn">Salva</button></div>';
 var el=f.elements;
 el.lid.onchange=function(){var l=S.l.find(function(x){return x.id==el.lid.value});if(l){el.pid.value=l.pid;if(!el.daa.value)el.daa.value=tn(l.tid)}};
 $("#xcx").onclick=function(){$("#dlg").close()};
-f.onsubmit=function(e){e.preventDefault();var d=Object.fromEntries(new FormData(f));d.importo=+d.importo;d.tipo=o.tipo;if(id)Object.assign(o,d);else{d.id=uid();S.x.push(d)}save();$("#dlg").close();render()};
+f.onsubmit=function(e){e.preventDefault();var d=Object.fromEntries(new FormData(f));d.importo=+d.importo;d.tipo=o.tipo;if(o.fattura)d.fattura=o.fattura;if(id)Object.assign(o,d);else{d.id=uid();S.x.push(d)}save();$("#dlg").close();render()};
 $("#dlg").showModal()}
 /* locazioni */
 V.locazioni=function(){
@@ -355,7 +359,7 @@ $("#lbody").onclick=sortClick(LS,renderLoc);renderLoc()}
 /* finanze */
 V.finanze=function(){
 var y=new Date().getFullYear();if(!FX.dal){FX.dal=y+"-01-01";FX.al=y+"-12-31"}
-return'<div class="th"><h1>💰 Finanze</h1><div class="dd"><button class="btn" id="xnew">＋ Nuova transazione ▾</button><div class="ddm" id="xmenu" hidden><button type="button" data-a="newx" data-t="entrata">📥 Entrata</button><button type="button" data-a="newx" data-t="spesa">📤 Spesa</button></div></div></div>'
+return'<div class="th"><h1>💰 Finanze</h1><div class="dd"><button class="btn" id="xnew">＋ Nuova transazione ▾</button><div class="ddm" id="xmenu" hidden><button type="button" data-a="newx" data-t="entrata">📥 Entrata</button><button type="button" data-a="newx" data-t="spesa">📤 Spesa</button><button type="button" data-a="impf">📄 Importa fattura</button></div></div></div>'
 +'<div class="panel fil"><b>🎛️ Filtra</b> <span class="hint" style="display:inline">Utilizza le opzioni per filtrare</span><div class="inl" style="margin-top:10px"><input id="fdal" type="date" style="width:auto" aria-label="Dal"><input id="fal" type="date" style="width:auto" aria-label="Al"><select id="fpid" style="width:auto">'+pOpts("","Tutte le proprietà")+'</select><select id="flid" style="width:auto">'+lOpts("","Tutte le locazioni")+'</select><select id="ftipo" style="width:auto"><option value="">Qualsiasi tipo</option><option value="entrata">Entrata</option><option value="spesa">Spesa</option></select><select id="fst" style="width:auto"><option value="">In qualsiasi stato</option><option>Saldato</option><option>In sospeso</option></select><input id="fq" type="search" placeholder="🔍 Cerca…" style="width:180px"><button class="btn red sm" id="frs">⊖ Rimuovi filtri</button></div><div id="fkpi"></div></div>'
 +'<div class="panel p0"><div style="padding:12px 14px"><select id="fn" style="width:auto">'+lns(FX.n)+'</select></div><div id="fbody"></div></div>'};
 function renderFin(){var el=$("#fbody");if(!el)return;var q=FX.q.toLowerCase(),rd=0,sp=0;
@@ -397,17 +401,19 @@ var can=sc2("Canone"),spi=sc2("Spese accessorie incassate");
 function sc2(c){return sum(function(x){return x.tipo=="entrata"&&x.cat==c})}
 var alt=sum(function(x){return x.tipo=="entrata"})-can-spi,sp=sum(function(x){return x.tipo=="spesa"}),ent=can+spi+alt,cond=sc(CATS[0]),ded=sc(CATS[1]),d50=sc(CATS[2]),d65=sc(CATS[3]),altre=sp-cond-ded-d50-d65,net=ent-sp;
 var en=[],spm=[];for(var i=1;i<=12;i++){var mm=(i<10?"0":"")+i;en.push(sum(function(x){return x.tipo=="entrata"&&x.data.slice(5,7)==mm}));spm.push(sum(function(x){return x.tipo=="spesa"&&x.data.slice(5,7)==mm}))}
-function R(l,v,c){return'<tr class="'+(c||"")+'"><td>'+l+"</td><td>"+eur(v)+"</td></tr>"}
+BX.rows=[];function R(l,v,c){BX.rows.push([l.replace(/<[^>]+>/g,""),Math.round(v*100)/100]);return'<tr class="'+(c||"")+'"><td>'+l+"</td><td>"+eur(v)+"</td></tr>"}
 el.innerHTML='<div class="panel"><div class="bil"><div><h2 style="margin:0 0 6px">🏘️ '+(BX.pid?esc(pn(BX.pid)):"Tutte le proprietà")+'</h2><div class="kp2" style="grid-template-columns:1fr 1fr"><div class="up"><small>ENTRATE LORDE (ANNO)</small><b class="pos">'+eur(ent)+'</b></div><div class="dn"><small>SPESE (ANNO)</small><b class="neg">'+(sp?eur(-sp):eur(0))+'</b></div></div><p style="line-height:1.9">– Canoni spese escluse <b class="pos">'+eur(can)+'</b><br>– Spese incassate <b class="pos">'+eur(spi)+'</b><br>– Altre entrate <b class="pos">'+eur(alt)+'</b></p><div class="kp2"><div class="nt"><small>📊 Risultato netto</small><b class="'+(net<0?"neg":"pos")+'">'+eur(net)+'</b></div></div></div><div><div class="lg"><i style="background:#f43f5e"></i>Spesa<i style="background:#14b8a6"></i>Entrate</div>'+chart(en,spm)+"</div></div></div>"
 +'<div class="panel p0" style="margin-top:14px"><div class="scroll"><table class="tbl fy" style="border:0;border-radius:0;box-shadow:none"><thead><tr><th>Anno Fiscale '+a+"</th><th>Importi</th></tr></thead><tbody>"
 +R("<b>Entrate</b> : canoni (oneri accessori esclusi)",can)+R("<b>Entrate</b> : altre",spi+alt)+R("TOTALE ENTRATE "+a,ent,"tot")
 +R("<b>Spese</b> : deducibili",cond+ded)+R("Condominio : Consuntivo : Spese deducibili",cond,"sub")+R("Spese deducibili: Altre",ded,"sub")
 +R("<b>Spese</b> : detraibili",d50+d65)+R("Spesa detraibile al 50%",d50,"sub")+R("Spesa deducibile al 65%",d65,"sub")
-+R("<b>Spese</b> : altre",altre)+R("TOTALE SPESE "+a,sp,"tot")+R("RISULTATO NETTO "+a,net,"tot")+"</tbody></table></div></div>"}
++R("<b>Spese</b> : altre",altre)+R("TOTALE SPESE "+a,sp,"tot")+R("RISULTATO NETTO "+a,net,"tot")+"</tbody></table></div>"+'<div class="foot" style="text-align:left"><div class="dd" style="display:inline-block"><button type="button" class="btn ghost" id="bexp">⬇️ Esporta ▾</button><div class="ddm" id="bmenu" hidden style="left:0;right:auto;top:auto;bottom:100%;margin-bottom:4px"><button type="button" data-ex="xlsx">📗 Excel (.xlsx)</button><button type="button" data-ex="csv">📄 CSV (.csv)</button><button type="button" data-ex="ods">📘 OpenOffice (.ods)</button></div></div></div></div>'}
 function bindBil(){
 $("#bya").onchange=function(){BX.anno=+this.value;renderBil()};
 $("#bpid").onchange=function(){BX.pid=this.value;renderBil()};
 $("#blid").onchange=function(){BX.lid=this.value;renderBil()};
+$("#bbody").onclick=function(e){if(e.target.closest("#bexp")){e.stopPropagation();var m=$("#bmenu");m.hidden=!m.hidden;return}var b=e.target.closest("[data-ex]");if(b){$("#bmenu").hidden=true;exportBil(b.dataset.ex)}};
+document.onclick=function(){var m=$("#bmenu");if(m)m.hidden=true};
 renderBil()}
 function openTen(id,pre){var o=id?(S.t.find(function(a){return a.id==id})||{}):(pre?{tipo:pre}:{});
 PF={id:id||null,o:o,docs:(o.docs||[]).slice(),emerg:(o.emerg||[]).slice(),garanti:(o.garanti||[]).slice()};view="tenform";render()}
@@ -460,6 +466,131 @@ if(file.size>15*1048576){show(0);alert("Il file supera i 15 MB.");return}d.idfil
 d.docs=PF.docs;d.emerg=PF.emerg;d.garanti=PF.garanti;
 if(PF.id)Object.assign(PF.o,d);else{d.id=uid();S.t.push(d)}
 save();go("inquilini")}}
+/* documenti, modelli, esportazione, importa fattura */
+var DTIPI=["Addendum al contratto","Attestazione del datore di lavoro","Atto di acquisto","Avviso","Bilancio annuale","Busta paga","Cataloghi","Contratto","Contratto di assicurazione","Contratto di fornitura","Contratto di lavoro","Contratto di locazione","Contratto di manutenzione","Controllo tecnico","Coordinate bancarie","Diagnostica","Dichiarazione dei redditi","Documenti assemblea condominiale","Documento di identità","Documento pensione","Estratto conto","Fattura","Fideiussione","Inventario","Preventivo","Ricevuta di pagamento","Visura catastale","Altro"],
+DS={arch:false,per:"",tipo:"",q:"",n:100,s:"data",d:-1},DF={id:null,o:{}};
+function fsz(b){b=+b||0;return b>=1048576?(b/1048576).toFixed(1)+" MB":b>=1024?Math.round(b/1024)+" KB":b?b+" B":"—"}
+function act2(a,b,id){
+if(a=="newd"){openDocu();return true}
+if(a=="impd"){openImp();return true}
+if(a=="impf"){openImpFat();return true}
+if(a=="edd"){openDocu(id);return true}
+if(a=="archd"){var x=S.d.find(function(y){return y.id==id});x.arch=!x.arch;save();render();return true}
+if(a=="deld"){if(confirm("Eliminare il documento?")){S.d=S.d.filter(function(y){return y.id!=id});save();render()}return true}
+if(a=="tpl"){openTpl(+id);return true}
+return false}
+V.documenti=function(){
+return'<div class="th"><h1>🗂️ Miei documenti</h1><div class="seg tseg" id="dseg"><button type="button" data-ar="0">✓ Attivi</button><button type="button" data-ar="1">🗄️ Archivio</button></div><div class="dd"><button class="btn" id="dnew">＋ Nuovo documento ▾</button><div class="ddm" id="dmenu" hidden><button type="button" data-a="newd">➕ Nuovo documento</button><button type="button" data-a="impd">⬆️ Importa documenti</button></div></div></div>'
++'<div class="panel fil"><b>🎛️ Filtra</b> <span class="hint" style="display:inline">Utilizza le opzioni per filtrare</span><div class="inl" style="margin-top:10px"><select id="dper" style="width:auto"><option value="">📅 Qualsiasi data</option><option value="30">Ultimi 30 giorni</option><option value="anno">Quest’anno</option></select><select id="dtip" style="width:auto"><option value="">Qualsiasi tipo</option>'+DTIPI.map(function(t){return"<option>"+t+"</option>"}).join("")+'</select><input id="dq" type="search" placeholder="🔍 Ricerca per parola chiave" style="width:240px"></div></div>'
++'<div class="panel p0"><div style="padding:12px 14px"><select id="dnr" style="width:auto">'+lns(DS.n)+'</select></div><div id="dbody"></div></div>'};
+function renderDocu(){var el=$("#dbody");if(!el)return;
+var q=DS.q.toLowerCase(),y=today().slice(0,4),lim=new Date(Date.now()-30*864e5).toISOString().slice(0,10);
+var rows=S.d.filter(function(x){return !!x.arch==DS.arch&&(!DS.tipo||x.tipo==DS.tipo)&&(DS.per!="30"||(x.data||"")>=lim)&&(DS.per!="anno"||(x.data||"").slice(0,4)==y)&&(!q||[x.file,x.desc,x.tipo,x.pid?pn(x.pid):"",x.tid?tn(x.tid):""].join(" ").toLowerCase().indexOf(q)>-1)}).map(function(x){return{x:x,file:x.file||"",prop:x.pid?pn(x.pid):"",tipo:x.tipo||"",desc:x.desc||"",con:x.tid?tn(x.tid):"",size:+x.size||0,data:x.data||""}});
+srt(rows,DS);var tot=rows.length;rows=rows.slice(0,DS.n);
+var cols=[["file","File"],["prop","Proprietà"],["tipo","Tipo"],["desc","Descrizione"],["con","Inquilino"],["size","Dimensione"],["data","Data"]];
+var h='<div class="scroll"><table class="tbl" style="border:0;border-radius:0;box-shadow:none"><thead>'+thd(cols,DS)+"</thead><tbody>"+rows.map(function(r){var x=r.x;
+return"<tr><td><b>📎 "+esc(r.file)+"</b></td><td>"+(esc(r.prop)||"—")+"</td><td>"+esc(r.tipo)+"</td><td>"+(esc(r.desc)||"—")+"</td><td>"+(esc(r.con)||"—")+"</td><td>"+fsz(r.size)+"</td><td>"+dt(r.data)+'</td><td style="white-space:nowrap"><button class="btn ghost sm" data-a="edd" data-id="'+x.id+'">✏️</button> <button class="btn ghost sm" data-a="archd" data-id="'+x.id+'">'+(x.arch?"↩ Ripristina":"🗄️")+'</button> <button class="btn del sm" data-a="deld" data-id="'+x.id+'">🗑️</button></td></tr>'}).join("")+"</tbody></table></div>";
+if(!tot)h+=nil("Qui puoi gestire i documenti e collegarli a proprietà e inquilini.",DS.arch?"":'<button class="btn" data-a="newd">＋ Nuovo documento</button>');
+else if(tot>rows.length)h+='<div class="hint" style="padding:10px 14px">Mostrati '+rows.length+" di "+tot+"</div>";
+el.innerHTML=h}
+function bindDocu(){var sg=$("#dseg");sg.querySelectorAll("button").forEach(function(b){b.classList.toggle("on",(b.dataset.ar=="1")==DS.arch)});
+$("#dper").value=DS.per;$("#dtip").value=DS.tipo;$("#dq").value=DS.q;$("#dnr").value=DS.n;
+sg.onclick=function(e){var b=e.target.closest("button");if(!b)return;DS.arch=b.dataset.ar=="1";sg.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x==b)});renderDocu()};
+$("#dper").onchange=function(){DS.per=this.value;renderDocu()};$("#dtip").onchange=function(){DS.tipo=this.value;renderDocu()};
+$("#dq").oninput=function(){DS.q=this.value;renderDocu()};$("#dnr").onchange=function(){DS.n=+this.value;renderDocu()};
+$("#dnew").onclick=function(e){e.stopPropagation();var m=$("#dmenu");m.hidden=!m.hidden};
+document.onclick=function(){var m=$("#dmenu");if(m)m.hidden=true};
+$("#dbody").onclick=sortClick(DS,renderDocu);renderDocu()}
+function openDocu(id){DF={id:id||null,o:id?(S.d.find(function(x){return x.id==id})||{}):{}};view="docform";render()}
+V.docform=function(){var o=DF.o;
+function sec(t){return'<div class="sec">'+t+"</div>"}
+function fr(l,i,hint,req){return'<div class="fr"><label>'+l+(req?"<em>*</em>":"")+"</label><div>"+i+(hint?'<div class="hint">'+hint+"</div>":"")+"</div></div>"}
+var g=sec("Assegnazione")+fr("Proprietà",'<select name="pid">'+pOpts(o.pid,"— Nessuna —")+"</select>")
++fr("Locazione",'<select name="lid">'+lOpts(o.lid,"— Nessuna —")+"</select>","Seleziona il contratto di locazione se questa voce è correlata.")
++sec("Tipo")+fr("Tipo",'<select name="tipo" required><option value="">Scegli</option>'+DTIPI.map(function(t){return so(t,o.tipo)}).join("")+"</select>","",1)
++sec("File")+fr("File",'<input type="file" name="f" accept=".doc,.docx,.pdf,.gif,.jpg,.jpeg,.png">'+(o.file?'<div class="hint">File attuale: '+esc(o.file)+"</div>":"")+'<div class="hint">Formati accettati: Word, PDF, Immagini (GIF, JPG, PNG). Dimensione massima: 15 Mega</div>',"",1)
++sec("Descrizione")+fr("Descrizione",'<textarea name="desc" rows="4">'+esc(o.desc)+"</textarea>")+fr("Data",'<input type="date" name="data" value="'+esc(o.data||today())+'">')
++sec("Collegamento")+fr("Inquilino",'<select name="tid"><option value="">— Nessuno —</option>'+S.t.map(function(t){return so(t.id,o.tid,t.nome)}).join("")+"</select>","Collega il documento a un inquilino.");
+return'<div class="th"><h1><button type="button" class="btn ghost sm" id="dback" aria-label="Indietro">‹</button> '+(DF.id?"Modifica documento":"Nuovo documento")+'</h1></div><div class="info"><b>Informazione</b><br>Archivia i documenti digitalizzati e collegali a proprietà, locazioni e inquilini.<br>Formati accettati: Word, PDF, Immagini (GIF, JPG, PNG). Dimensione massima: 15 Mega. Dei file viene salvato solo il nome.<p style="margin:10px 0 4px">Per catalogare i tuoi documenti puoi:</p><ul style="margin:0;padding-left:20px"><li>Fare una foto facendo attenzione all’inquadratura ed alla qualità dell’immagine. Puoi usare del software di ottimizzazione per smart phones.</li><li>Con uno scanner. Una risoluzione da 150 a 200 dpi di solito è sufficiente per evitare di creare file troppo pesanti.</li></ul></div><form id="df" novalidate><div class="panel p0">'+g+'</div><div class="pfoot"><button class="btn">Salva</button><button type="button" class="btn ghost" id="dcx2">Annulla</button></div></form>'};
+function bindDocForm(){var f=$("#df"),el=f.elements;
+$("#dback").onclick=function(){go("documenti")};$("#dcx2").onclick=function(){go("documenti")};
+el.f.required=!DF.o.file;
+el.lid.onchange=function(){var l=S.l.find(function(x){return x.id==el.lid.value});if(l){el.pid.value=l.pid;if(!el.tid.value)el.tid.value=l.tid}};
+f.onsubmit=function(e){e.preventDefault();
+if(!f.checkValidity()){f.reportValidity();return}
+var fd=new FormData(f),d=Object.fromEntries(fd),file=fd.get("f");delete d.f;
+if(file&&file.name){if(!/\.(docx?|pdf|gif|jpe?g|png)$/i.test(file.name)){alert("Formato non accettato. Usa Word, PDF o immagini GIF, JPG, PNG.");return}
+if(file.size>15*1048576){alert("Il file supera i 15 MB.");return}d.file=file.name;d.size=file.size}
+if(DF.id)Object.assign(DF.o,d);else{d.id=uid();S.d.push(d)}
+save();go("documenti")}}
+function openImp(){var f=$("#frm");
+f.innerHTML='<h2 style="margin:0 0 6px">⬆️ Importa documenti</h2><label>File (puoi sceglierne più di uno)</label><input type="file" name="fs" multiple accept=".doc,.docx,.pdf,.gif,.jpg,.jpeg,.png" required><div class="hint">Word, PDF o immagini, massimo 15 MB per file. Di ogni file viene salvato solo il nome.</div><label>Tipo</label><select name="tipo">'+DTIPI.map(function(t){return so(t,"Altro")}).join("")+'</select><label>Proprietà (facoltativa)</label><select name="pid">'+pOpts("","— Nessuna —")+'</select><div class="row"><button type="button" class="btn ghost" id="icx">Annulla</button><button class="btn">Importa</button></div>';
+$("#icx").onclick=function(){$("#dlg").close()};
+f.onsubmit=function(e){e.preventDefault();var fd=new FormData(f),n=0,bad=[];
+fd.getAll("fs").forEach(function(x){if(!x||!x.name)return;if(!/\.(docx?|pdf|gif|jpe?g|png)$/i.test(x.name)||x.size>15*1048576){bad.push(x.name);return}
+S.d.push({id:uid(),tipo:fd.get("tipo"),pid:fd.get("pid"),file:x.name,size:x.size,desc:x.name.replace(/\.[^.]+$/,""),data:today()});n++});
+if(bad.length)alert("Non importati (formato o dimensione non validi): "+bad.join(", "));
+if(!n)return;save();$("#dlg").close();render()};
+$("#dlg").showModal()}
+function openImpFat(){var f=$("#frm");
+f.innerHTML='<h2 style="margin:0 0 6px">📄 Importa fattura</h2><label>File della fattura</label><input type="file" name="f" accept=".xml,.pdf,.jpg,.jpeg,.png" required><div class="hint">Con una fattura elettronica XML compilo da solo data, importo e controparte. Per PDF e immagini compilo la descrizione e il resto lo completi tu.</div><label>Tipo</label><select name="tipo"><option value="spesa">Spesa (fattura ricevuta)</option><option value="entrata">Entrata (fattura emessa)</option></select><div class="row"><button type="button" class="btn ghost" id="ifx">Annulla</button><button class="btn">Continua</button></div>';
+$("#ifx").onclick=function(){$("#dlg").close()};
+f.onsubmit=function(e){e.preventDefault();var file=f.elements.f.files[0],tipo=f.elements.tipo.value;
+if(!file)return;if(file.size>15*1048576){alert("Il file supera i 15 MB.");return}
+function avanti(pre){$("#dlg").close();openTx(null,tipo,pre)}
+if(/\.xml$/i.test(file.name)){var r=new FileReader();
+r.onload=function(){var pre={fattura:file.name,stato:"In sospeso"};
+try{var d=new DOMParser().parseFromString(r.result,"text/xml");
+var g=function(root,tag){var n=root&&root.getElementsByTagNameNS("*",tag)[0];return n?n.textContent.trim():""};
+var dg=d.getElementsByTagNameNS("*","DatiGeneraliDocumento")[0],ce=d.getElementsByTagNameNS("*",tipo=="spesa"?"CedentePrestatore":"CessionarioCommittente")[0];
+var nome=g(ce,"Denominazione")||(g(ce,"Nome")+" "+g(ce,"Cognome")).trim(),imp=parseFloat(g(dg,"ImportoTotaleDocumento")),num=g(dg,"Numero"),dat=g(dg,"Data"),cau=g(dg,"Causale");
+if(/^\d{4}-\d{2}-\d{2}$/.test(dat))pre.data=dat;if(imp)pre.importo=imp;if(nome)pre.daa=nome;
+if(num||cau)pre.desc=("Fattura "+num+(cau?" – "+cau:"")).trim()}catch(err){}
+if(!pre.desc)pre.desc="Fattura "+file.name.replace(/\.[^.]+$/,"");avanti(pre)};
+r.onerror=function(){alert("Impossibile leggere il file.")};r.readAsText(file)}
+else avanti({fattura:file.name,desc:"Fattura "+file.name.replace(/\.[^.]+$/,""),stato:"In sospeso"})};
+$("#dlg").showModal()}
+function dl(blob,fn){var u=URL.createObjectURL(blob),l=document.createElement("a");l.href=u;l.download=fn;document.body.appendChild(l);l.click();l.remove();setTimeout(function(){URL.revokeObjectURL(u)},2000)}
+function loadX(cb){if(window.XLSX)return cb();var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";sc.onload=cb;sc.onerror=function(){alert("Non riesco a caricare lo strumento di esportazione: controlla la connessione.")};document.head.appendChild(sc)}
+function exportBil(fmt){var a=String(BX.anno),rows=[["Anno Fiscale "+a,"Importi"]].concat(BX.rows||[]),name="bilancio-"+a;
+if(fmt=="csv"){var csv="\ufeff"+rows.map(function(r){return r.map(function(c){return'"'+(typeof c=="number"?c.toFixed(2).replace(".",","):String(c)).replace(/"/g,'""')+'"'}).join(";")}).join("\r\n");dl(new Blob([csv],{type:"text/csv;charset=utf-8"}),name+".csv");return}
+loadX(function(){var ws=XLSX.utils.aoa_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Bilancio "+a);XLSX.writeFile(wb,name+"."+fmt,{bookType:fmt})})}
+function lt(ti,b){return[ti,"{luogo}, {data}\n\nOggetto: "+ti+"\n\nGentile {conduttore},\n\n"+b+"\n\nDistinti saluti,\n{locatore}"]}
+function dcm(ti,b){return[ti,ti.toUpperCase()+"\n\n"+b+"\n\n{luogo}, {data}\n\nFirma ____________________"]}
+var TPL=[
+lt("Comunicazione dell’avvenuta registrazione del contratto","con la presente Le comunico che il contratto di locazione relativo all’immobile sito in {immobile}, con decorrenza dal {inizio}, è stato registrato presso l’Agenzia delle Entrate.\nEstremi di registrazione: ____________________.\nResto a disposizione per fornirLe copia della ricevuta di registrazione."),
+lt("Comunicazione dell’opzione per la cedolare secca","con la presente Le comunico di aver optato, per il contratto di locazione relativo all’immobile sito in {immobile}, per il regime della cedolare secca.\nPer la durata dell’opzione non sarà quindi richiesto l’aggiornamento del canone, neppure per la variazione ISTAT."),
+lt("Conteggio finale del deposito cauzionale","Le trasmetto il conteggio finale del deposito cauzionale relativo all’immobile sito in {immobile}:\n- deposito versato: {deposito}\n- somme trattenute (canoni, spese, danni): € ________ per ____________________\n- somma da restituire: € ________\nLa somma sarà restituita entro il ____________________."),
+lt("Diffida ad adempiere per morosità","Le contesto il mancato pagamento di canoni e oneri accessori relativi al periodo ____________________, per un importo complessivo di € ________, riferiti all’immobile sito in {immobile} (canone mensile {canone}).\nLa invito a versare quanto dovuto entro 15 giorni dal ricevimento della presente. In difetto il contratto si intenderà risolto di diritto ai sensi dell’art. 1454 del codice civile e agirò per il recupero delle somme e il rilascio dell’immobile."),
+lt("Diffida per uso difforme dell’immobile","ho rilevato che l’immobile sito in {immobile} viene utilizzato in modo difforme dall’uso pattuito nel contratto: ____________________.\nLa invito a ripristinare l’uso previsto entro ____ giorni dal ricevimento della presente. In difetto mi riservo di agire per la risoluzione del contratto e il risarcimento del danno."),
+lt("Diniego di rinnovo alla prima scadenza","con la presente Le comunico il diniego di rinnovo del contratto di locazione relativo all’immobile sito in {immobile}, alla prima scadenza del {fine}, per il seguente motivo previsto dalla legge: ____________________.\nLa presente è inviata nel rispetto del termine di preavviso di ____ mesi. La invito a riconsegnare l’immobile e le chiavi entro la data di scadenza."),
+lt("Disdetta alla seconda scadenza","con la presente Le comunico la disdetta del contratto di locazione relativo all’immobile sito in {immobile}, alla seconda scadenza del {fine}, con preavviso di ____ mesi come previsto dalla legge e dal contratto.\nLa invito a riconsegnare l’immobile libero e le chiavi entro tale data."),
+dcm("Escussione del fideiussore","Spett.le ____________________ (fideiussore),\n\nin qualità di garante di {conduttore} per il contratto di locazione relativo all’immobile sito in {immobile}, La informo che il conduttore risulta inadempiente per € ________ (periodo ____________________).\nAi sensi della fideiussione sottoscritta, La invito a versare tale importo entro ____ giorni dal ricevimento della presente.\n\n{locatore}"),
+dcm("Fideiussione per un contratto di locazione","Il/La sottoscritto/a ____________________ (fideiussore) dichiara di costituirsi garante di {conduttore} verso {locatore} per tutte le obbligazioni derivanti dal contratto di locazione dell’immobile sito in {immobile}, con decorrenza dal {inizio}, fino all’importo massimo di € ________ e per la durata di ____________________."),
+lt("Presa d’atto del recesso del conduttore","prendo atto della Sua comunicazione di recesso dal contratto di locazione relativo all’immobile sito in {immobile}.\nIl rapporto cesserà il ____________________, nel rispetto del preavviso di ____ mesi. Concordiamo una data per il sopralluogo e per la riconsegna delle chiavi."),
+dcm("Quietanza di pagamento del canone","Il/La sottoscritto/a {locatore} dichiara di aver ricevuto da {conduttore} la somma di {canone} a titolo di canone di locazione per il periodo ____________________, relativo all’immobile sito in {immobile}, e rilascia quietanza di pagamento."),
+dcm("Ricevuta del deposito cauzionale","Il/La sottoscritto/a {locatore} dichiara di aver ricevuto da {conduttore} la somma di {deposito} a titolo di deposito cauzionale per l’immobile sito in {immobile}. La somma sarà restituita alla cessazione del contratto, previa verifica dello stato dell’immobile."),
+lt("Richiesta di accesso all’immobile","La informo che il giorno ____________________ alle ore ________ dovrò accedere all’immobile sito in {immobile} per ____________________ (ispezione, manutenzione, visita).\nLa prego di confermare la Sua disponibilità o di proporre una data alternativa."),
+lt("Richiesta di aggiornamento ISTAT del canone","ai sensi del contratto di locazione relativo all’immobile sito in {immobile}, Le comunico l’aggiornamento del canone in base alla variazione ISTAT pari al ____ % (quota applicata ____ %).\nCanone attuale: {canone}. Nuovo canone: € ________ a decorrere dal ____________________."),
+lt("Richiesta di rinnovo a nuove condizioni","Le propongo il rinnovo del contratto di locazione relativo all’immobile sito in {immobile}, in scadenza il {fine}, alle seguenti condizioni:\n- canone: € ________\n- durata: ____________________\n- altre condizioni: ____________________\nLa prego di rispondere entro il ____________________."),
+lt("Richiesta di ripristino dei danni","a seguito del sopralluogo del ____________________ sono stati rilevati danni all’immobile sito in {immobile}: ____________________.\nLa invito a provvedere al ripristino entro ____ giorni. In difetto provvederò direttamente, addebitando i relativi costi."),
+lt("Sollecito di pagamento","da una verifica risulta non ancora pagato quanto segue: ____________________, per € ________ (canone mensile {canone}).\nLa invito a provvedere entro ____ giorni. Se ha già effettuato il pagamento, La prego di ignorare questa comunicazione."),
+dcm("Verbale di consegna dell’immobile","Immobile: {immobile}\nLocatore: {locatore}\nConduttore: {conduttore}\n\nStato dei luoghi: ____________________\nLetture dei contatori: luce ________ gas ________ acqua ________\nChiavi consegnate: n. ____\nDotazioni e arredi presenti: ____________________\nAnnotazioni: ____________________"),
+dcm("Verbale di riconsegna e ricevuta delle chiavi","Immobile: {immobile}\nLocatore: {locatore}\nConduttore: {conduttore}\n\nIl conduttore riconsegna l’immobile e il locatore dichiara di aver ricevuto n. ____ chiavi.\nStato dei luoghi alla riconsegna: ____________________\nLetture dei contatori: luce ________ gas ________ acqua ________\nDanni o difformità rilevati: ____________________")
+];
+V.modelli=function(){return'<div class="th"><h1>📝 Modelli di documenti</h1></div><div class="panel p0"><div class="sec">Per i proprietari</div><div style="padding:16px 20px;display:grid;line-height:1.9;justify-items:start">'+TPL.map(function(t,i){return'<button type="button" class="lnk" data-a="tpl" data-id="'+i+'">'+esc(t[0])+"</button>"}).join("")+"</div></div>"};
+function openTpl(i){var t=TPL[i],f=$("#frm"),dg=$("#dlg");
+f.innerHTML='<h2 style="margin:0 0 6px">'+esc(t[0])+'</h2><label>Locazione (per compilare i dati)</label><select name="lid">'+lOpts("","— Nessuna —")+'</select><label>Testo (modificabile)</label><textarea name="tx" rows="14"></textarea><div class="hint">Bozza generica: completa i campi con ____ e fai verificare il testo da un professionista prima di usarlo.</div><div class="row"><button type="button" class="btn ghost" id="tcl">Chiudi</button><button type="button" class="btn" id="tcp">📋 Copia testo</button></div>';
+var sl=f.elements.lid,tx=f.elements.tx;
+function fill(){var l=S.l.find(function(x){return x.id==sl.value}),p=l&&S.p.find(function(x){return x.id==l.pid}),b="________",
+m={locatore:b,conduttore:l?tn(l.tid):b,immobile:p?[p.nome,p.indirizzo,p.citta].filter(Boolean).join(", "):b,canone:l&&l.canone?eur(l.canone):b,deposito:l&&l.deposito?eur(l.deposito):b,inizio:l?dt(l.inizio):b,fine:l&&l.fine?dt(l.fine):b,data:new Date().toLocaleDateString("it-IT"),luogo:p&&p.citta?p.citta:b};
+tx.value=t[1].replace(/\{(\w+)\}/g,function(_,k){return m[k]||b})}
+sl.onchange=fill;fill();
+$("#tcl").onclick=function(){dg.close()};
+$("#tcp").onclick=function(){var bt=this,ok=function(){bt.textContent="✓ Copiato"};tx.select();
+if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(tx.value).then(ok,function(){try{document.execCommand("copy")}catch(e){}ok()})}else{try{document.execCommand("copy")}catch(e){}ok()}};
+f.onsubmit=function(e){e.preventDefault()};
+dg.style.width="min(640px,94vw)";dg.onclose=function(){dg.style.width=""};dg.showModal()}
 var TS={arch:false,tipo:"",q:"",n:100,s:"nome",d:1},PRE=null;
 function tenShell(){
 return'<div class="th"><h1>Inquilini</h1><div class="seg tseg" id="tseg"><button type="button" data-ar="0" class="on">✓ Attivi</button><button type="button" data-ar="1">Archivio</button></div><div class="dd"><button class="btn" id="tnew">Nuovo inquilino ▾</button><div class="ddm" id="tmenu" hidden><button type="button" data-tt="Privato singolo">Privato singolo</button><button type="button" data-tt="Società">Società</button></div></div></div>'
@@ -609,6 +740,8 @@ function bind(){
 if(view=="propform")bindProp();
 if(view=="inquilini")bindTen();
 if(view=="tenform")bindTenForm();
+if(view=="documenti")bindDocu();
+if(view=="docform")bindDocForm();
 if(view=="locazioni")bindLoc();
 if(view=="finanze")bindFin();
 if(view=="bilancio")bindBil();
@@ -627,7 +760,7 @@ const q=s=>document.querySelector(s);
 if(String(firebaseConfig.apiKey).startsWith("INCOLLA")){q("#boot").textContent="Prima completa il file firebase-config.js (vedi le istruzioni).";throw new Error("config mancante")}
 const app=initializeApp(firebaseConfig),auth=getAuth(app),
 db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
-const COLL=["p","t","l","x"];
+const COLL=["p","t","l","x","d"];
 let uid=null,unsubs=[],LAST={},loaded=0,started=false;
 const snapOf=c=>{const m={};(S[c]||[]).forEach(o=>m[o.id]=JSON.stringify(o));return m};
 window.cloudSave=function(){
