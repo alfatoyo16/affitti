@@ -409,7 +409,6 @@ $("#bya").onchange=function(){BX.anno=+this.value;renderBil()};
 $("#bpid").onchange=function(){BX.pid=this.value;renderBil()};
 $("#blid").onchange=function(){BX.lid=this.value;renderBil()};
 renderBil()}
-EM.tenform="🧑‍🤝‍🧑";
 function openTen(id,pre){var o=id?(S.t.find(function(a){return a.id==id})||{}):(pre?{tipo:pre}:{});
 PF={id:id||null,o:o,docs:(o.docs||[]).slice(),emerg:(o.emerg||[]).slice(),garanti:(o.garanti||[]).slice()};view="tenform";render()}
 V.tenform=function(){var o=PF.o,TT=["Informazioni generali","Informazioni aggiuntive","Garanti","Contatti di emergenza","Documenti"];
@@ -615,7 +614,7 @@ if(view=="finanze")bindFin();
 if(view=="bilancio")bindBil();
 if(view=="canone"){var f=function(){var c=parseFloat($("#c1").value),v=parseFloat($("#c2").value)||0,q=parseFloat($("#c3").value)/100;if(isNaN(c)){$("#cr").textContent="Inserisci il canone per vedere il risultato.";return}var inc=c*v/100*q;$("#cr").innerHTML="Nuovo canone: <b>"+eur(c+inc)+"</b><br>Aumento: "+eur(inc)+" al mese ("+eur(inc*12)+" all'anno)"};["c1","c2","c3"].forEach(function(i){$("#"+i).oninput=f})}
 if(view=="conguaglio"){var g=function(){var a=parseFloat($("#g1").value),s=parseFloat($("#g2").value);if(isNaN(a)||isNaN(s)){$("#gr").textContent="Inserisci gli importi per vedere il risultato.";return}var d=s-a;$("#gr").innerHTML=d>0?"L'inquilino deve versare <b>"+eur(d)+"</b>":d<0?"Da restituire all'inquilino: <b>"+eur(-d)+"</b>":"Nessun conguaglio: acconti e spese coincidono."};["g1","g2"].forEach(function(i){$("#"+i).oninput=g})}}
-var EM={scrivania:"🏡",proprieta:"🏢",inquilini:"🧑‍🤝‍🧑",canone:"📈",conguaglio:"🧮",propform:"🏢"};
+var EM={scrivania:"🏡",proprieta:"🏢",inquilini:"🧑‍🤝‍🧑",canone:"📈",conguaglio:"🧮",propform:"🏢",tenform:"🧑‍🤝‍🧑"};
 function render(){nav();$("#main").innerHTML=V[view]();bind();var h1=$("#main h1");if(h1&&EM[view]&&h1.textContent.indexOf(EM[view])<0)h1.textContent=EM[view]+" "+h1.textContent;$("#main").scrollTop=0}
 window.appStart=function(){render()};
 </script>
